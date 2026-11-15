@@ -117,6 +117,23 @@ npm run dev
 
 ---
 
+### 4. Deploy the Frontend to Cloudflare Workers
+
+The Next.js frontend is configured for Cloudflare Workers with the OpenNext adapter.
+In the Cloudflare Worker build settings, use:
+
+| Setting | Value |
+|---|---|
+| Root directory | `frontend` |
+| Build command | `npm run build:worker` |
+| Deploy command | `npx wrangler deploy` |
+
+Add `NEXT_PUBLIC_API_URL` as a **build variable** in Cloudflare, pointing to the deployed backend API and ending in `/api` (for example, `https://api.example.com/api`). The backend must be deployed separately; do not use the local `http://localhost:5000/api` value in production.
+
+You can also deploy locally from `frontend/` with `npm run deploy`.
+
+---
+
 ## 📁 Project Structure
 
 ```
