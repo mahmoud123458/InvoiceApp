@@ -134,6 +134,12 @@ On the backend host, set `CORS_ORIGINS` to the frontend's exact origin (for exam
 
 You can also deploy locally from `frontend/` with `npm run deploy`.
 
+### Deploy the Backend to Render
+
+The root `render.yaml` defines the backend as a Render Blueprint. In Render, choose **New → Blueprint**, connect this repository, and provide the requested MongoDB Atlas connection string and initial administrator details. Render generates `JWT_SECRET` automatically and uses the configured frontend origin for CORS.
+
+After deployment, verify `https://<service-name>.onrender.com/api/health`, then set the Cloudflare build variable `NEXT_PUBLIC_API_URL` to `https://<service-name>.onrender.com/api` and redeploy the frontend.
+
 ---
 
 ## 📁 Project Structure
