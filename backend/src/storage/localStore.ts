@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 
 const DATA_DIR = path.join(__dirname, '../../data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
+const isVercel = process.env.VERCEL === '1';
 
 export interface LocalDbData {
   users: any[];
@@ -20,6 +21,10 @@ function generateId(): string {
 }
 
 function loadData(): LocalDbData {
+  if (isVercel) {
+    return getInitialData();
+  }
+
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -50,6 +55,8 @@ function loadData(): LocalDbData {
 }
 
 function saveData(data: LocalDbData): void {
+  if (isVercel) return;
+
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
