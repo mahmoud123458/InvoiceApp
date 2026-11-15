@@ -117,28 +117,25 @@ npm run dev
 
 ---
 
-### 4. Deploy the Frontend to Cloudflare Workers
+### 4. Deploy Frontend and Backend to Vercel
 
-The Next.js frontend is configured for Cloudflare Workers with the OpenNext adapter.
-In the Cloudflare Worker build settings, use:
+This repository contains two Vercel projects. Import the Git repository twice and set each project's **Root Directory**:
 
-| Setting | Value |
-|---|---|
-| Root directory | `frontend` |
-| Build command | `npm run build:worker` |
-| Deploy command | `npx wrangler deploy` |
+| Project | Root directory | Framework |
+|---|---|---|
+| Frontend | `frontend` | Next.js |
+| Backend | `backend` | Express |
 
-The backend must be deployed separately from the frontend. Set `NEXT_PUBLIC_API_URL` as a **build variable** in Cloudflare to the deployed backend API URL ending in `/api` (for example, `https://api.example.com/api`); do not use `http://localhost:5000/api` in production.
+Create and deploy the frontend project first to get its production domain. Login will not work until the backend is deployed and connected.
 
-On the backend host, set `CORS_ORIGINS` to the frontend's exact origin (for example, `https://invoiceapp.mahmoudnabil11112.workers.dev`, without a path). Multiple origins can be comma-separated. Also configure the production `MONGODB_URI` and `JWT_SECRET` there.
+Next, create the backend project and set these Vercel environment variables:
 
-You can also deploy locally from `frontend/` with `npm run deploy`.
+- `MONGODB_URI`: production MongoDB connection string.
+- `JWT_SECRET`: a strong, private signing secret.
+- `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`: initial administrator details for a new database.
+- `CORS_ORIGINS`: the exact production frontend origin, such as `https://your-frontend.vercel.app`.
 
-### Deploy the Backend to Render
-
-The root `render.yaml` defines the backend as a Render Blueprint. In Render, choose **New → Blueprint**, connect this repository, and provide the requested MongoDB Atlas connection string and initial administrator details. Render generates `JWT_SECRET` automatically and uses the configured frontend origin for CORS.
-
-After deployment, verify `https://<service-name>.onrender.com/api/health`, then set the Cloudflare build variable `NEXT_PUBLIC_API_URL` to `https://<service-name>.onrender.com/api` and redeploy the frontend.
+Set `CORS_ORIGINS` to the exact frontend production origin (without a path). The backend exposes its health check at `/api/health`. After deploying it, set `NEXT_PUBLIC_API_URL` in the frontend Vercel project to the backend deployment URL ending in `/api`, then redeploy the frontend.
 
 ---
 

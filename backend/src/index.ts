@@ -29,8 +29,8 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-// Connect to MongoDB & Seed if empty
-connectDB().then(async () => {
+async function initializeDatabase(): Promise<void> {
+  await connectDB();
   localStore.removeClientPortalData();
   if (mongoose.connection.readyState === 1) {
     await Promise.all([
@@ -69,15 +69,23 @@ connectDB().then(async () => {
 
   await User.create({ name, email, password, role: 'admin' });
   console.log(`✅ Initial administrator created for ${email}`);
-}).catch((error) => {
-  console.error('❌ Database initialization failed:', error.message);
-  process.exit(1);
-});
+}
 
 // Middleware
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
+
+let databaseInitialization: Promise<void> | undefined;
+app.use((_req, _res, next) => {
+  if (!databaseInitialization) {
+    databaseInitialization = initializeDatabase().catch((error) => {
+      databaseInitialization = undefined;
+      throw error;
+    });
+  }
+  void databaseInitialization.then(() => next()).catch(next);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -97,8 +105,10 @@ app.get('/api/health', (_req, res) => {
 // Error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
