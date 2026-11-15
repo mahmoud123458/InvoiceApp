@@ -1,6 +1,7 @@
 import { ApiResponse } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+  || (process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : null);
 const inFlightGetRequests = new Map<string, Promise<ApiResponse<unknown>>>();
 
 function getToken(): string | null {
@@ -19,6 +20,11 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
+  const apiUrl = API_URL;
+  if (!apiUrl) {
+    throw new Error('Backend API URL is not configured. Set NEXT_PUBLIC_API_URL for this deployment.');
+  }
+
   const token = getToken();
   const method = (options.method || 'GET').toUpperCase();
   const requestKey = method === 'GET'
@@ -34,7 +40,7 @@ async function request<T>(
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const requestPromise = (async (): Promise<ApiResponse<T>> => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${apiUrl}${endpoint}`, {
       ...options,
       headers,
     });

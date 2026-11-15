@@ -24,6 +24,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Connect to MongoDB & Seed if empty
 connectDB().then(async () => {
@@ -71,7 +75,7 @@ connectDB().then(async () => {
 });
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
 

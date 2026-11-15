@@ -128,7 +128,9 @@ In the Cloudflare Worker build settings, use:
 | Build command | `npm run build:worker` |
 | Deploy command | `npx wrangler deploy` |
 
-Add `NEXT_PUBLIC_API_URL` as a **build variable** in Cloudflare, pointing to the deployed backend API and ending in `/api` (for example, `https://api.example.com/api`). The backend must be deployed separately; do not use the local `http://localhost:5000/api` value in production.
+The backend must be deployed separately from the frontend. Set `NEXT_PUBLIC_API_URL` as a **build variable** in Cloudflare to the deployed backend API URL ending in `/api` (for example, `https://api.example.com/api`); do not use `http://localhost:5000/api` in production.
+
+On the backend host, set `CORS_ORIGINS` to the frontend's exact origin (for example, `https://invoiceapp.mahmoudnabil11112.workers.dev`, without a path). Multiple origins can be comma-separated. Also configure the production `MONGODB_URI` and `JWT_SECRET` there.
 
 You can also deploy locally from `frontend/` with `npm run deploy`.
 
